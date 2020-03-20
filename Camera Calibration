@@ -1,0 +1,53 @@
+# Camera Calibration
+
+Camera Calibration will significantly improve the quality of modules work, related to computer vision: [Detection of ArUco Markers](aruco.md) and [Optical Flow](optical_flow.md).
+
+Camera calibration selects the parameters that best describe the specific lens installed.
+The parameters include  focal lengths, the location of the principal point (that depend by camera lens placement  concerning the centre), distortion coefficient *D*. You can read more about used model of distortion caused by cameras in the [OpenCV documentation](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html).
+
+Several tools what allaws to calibrate camera and write calculated parametrs into the system exist. It usually use calibration images: "Chessboard" and a combinations of chessboards and ArUco-markers grids ([*ChArUco*](https://docs.opencv.org/3.4/df/d4a/tutorial_charuco_detection.html)).
+
+## ROS-package camera_calibration
+
+Basic Tutorial: http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration.
+
+To calibrate the camera with ROS-package camera_calibration you need a computer with OS GNU/Linux and [ROS Melodic](ros-install.md).
+
+<img src="../assets/camera_calibration.png" alt="ROS Camera Calibrator" class="zoom center" width=600>
+
+1. Using a terminal, install package `camera_calibration` into your computer:
+
+    ```bash
+    sudo apt-get install ros-melodic-camera-calibration
+    ```
+
+2.  Download the chessboard – [`chessboard.pdf`](../assets/chessboard.pdf). Print out the chessboard on the printer or display it on the computer screen.
+
+3. Connect to [Wi-Fi Clover](wifi.md).
+
+4. Run the camera calibration(on the computer):
+
+   ```bash
+   ROS_MASTER_URI=http://192.168.11.1:11311 rosrun camera_calibration cameracalibrator.py --size 6x8 --square 0.108 image:=/main_camera/image_raw camera:=/main_camera
+   ```
+
+   > **Note** Change the value *0.108* to real size of square on the chessboard or on the screen (in metres). For example, value *0.03* will correspond to 3 cm.
+
+5. When the calibration program starts, move the drone by the way, when the chessboard got into the frame from different angles.
+
+   * Move the chessboard to the left, right, top and buttom part of the frame.
+   * Rotate the chessboard around all 3 axes.
+   * Move camera further away and closer agane to the chessboard.
+
+6. Click the button *CALIBRATE*, when it will be active. The process of computing calibration parametrs will take some minutes.
+
+   When the calibration's done, you'll see received parametrs in the terminal. The corrected distortion image will be displayed in the window. If the colibration is successfully, all real straight lines in the received image should remain straight.
+
+7. Click the button *COMMIT* to save received calibration parametrs. The result will be written into the file of Clover main camera calibration:
+`/home/pi/catkin_ws/src/clever/clever/camera_info/fisheye_cam_320.yaml`.
+
+8. Restart Clover servises:
+
+   ```bash
+   sudo systemctl restart clever
+   ```
